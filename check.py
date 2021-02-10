@@ -33,7 +33,7 @@ def html_to_tag_tr(html):
     for td in html.find_all('tr'):
         #print(td.get_text())
         tr.extend(td.get_text().split("\n"))
-    print(tr)
+    #print(tr)
     return tr
 
 def count_questions(tag_a):
@@ -51,18 +51,43 @@ def count_questions(tag_a):
 def find_users_name(tag_a, question_c):
     return tag_a[question_c + 6: -(2+question_c)]
 
-def find_users_solve(tag_tr, users_name):
+def find_users_solve_time(tag_tr, users_name):
     solve_arr = []
+    time_arr = []
     for u in users_name:
         #print(tag_tr.index(u))
         solve_arr.append(tag_tr[tag_tr.index(u) + 1])
-    return solve_arr, "b"
+        time_arr.append(tag_tr[tag_tr.index(u) + 2])
+    return solve_arr, time_arr
 
 
 
 html = url_to_html("https://open.kattis.com/contests/k4ornu")
 tag_a  = html_to_tag_a(html)
+
 question_c = count_questions(tag_a)
+
 users_name = find_users_name(tag_a, question_c)
-users_solve = find_users_solve(html_to_tag_tr(html), users_name)
-print(users_solve[0])
+
+users_solve_time = find_users_solve_time(html_to_tag_tr(html), users_name)
+users_solve = users_solve_time[0]
+users_time = users_solve_time[1]
+
+
+arr_2d = []
+arr_1d = []
+#print(html.tr.prettify()[html.tr.prettify().find(users_name[0])::])
+tr = str(html.find_all('tr'))
+tr_arr = tr[tr.find(users_name[0]):tr.find('<td colspan="{}"></td>'.format(len(users_name)))].split('\n')
+#print(tr_arr)
+for t in users_solve:
+    arr_1d.clear()
+    counter = 0
+    index = tr_arr.index('<td class="total table-min-wrap table-td-align-right">{}</td>'.format(t)) + 2
+    for i in range(question_c):
+        counter += 1
+        if tr_arr[index + i] != '<td></td>':
+            arr_1d.append(counter)
+    arr_2d.append(arr_1d)
+
+print(arr_2d)
