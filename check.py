@@ -1,5 +1,10 @@
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString
 import requests
+import difflib
+import json
+import time as t
+
+users = []
 
 class User:
     def __init__(self, name, rank, solve_c, time):
@@ -59,7 +64,7 @@ def find_contest_name(html):
 def find_remaining_time(html):
     return list(html.find_all('span'))[2].string
 
-def find_users_solve_arr(): # PROBLEM: if is always false
+'''def find_users_solve_arr(): # PROBLEM: if is always false
     arr_2d = []
     arr_1d = []
     tr = str(html.find_all('tr'))
@@ -74,23 +79,66 @@ def find_users_solve_arr(): # PROBLEM: if is always false
                 arr_1d.append(counter)
         arr_2d.append(arr_1d)
     print(arr_2d)
-    return arr_2d
+    return arr_2d'''
 
-html = url_to_html("https://open.kattis.com/contests/vvba29")
-tag_a  = html_to_tag_a(html)
+def init_users():
+    html = url_to_html("https://open.kattis.com/contests/rh8cuo")
+    tag_a  = html_to_tag_a(html)
 
-question_c = count_questions(tag_a)
+    question_c = count_questions(tag_a)
 
-users_name = find_users_name(tag_a, question_c)
+    users_name = find_users_name(tag_a, question_c)
 
-users_solve_time = find_users_solve_time(html_to_tag_tr(html), users_name)
-users_solve = users_solve_time[0]
-users_time = users_solve_time[1]
+    users_solve_time = find_users_solve_time(html_to_tag_tr(html), users_name)
+    users_solve = users_solve_time[0]
+    users_time = users_solve_time[1]
 
-# generating the object of users
-users = []
-for i in range(len(users_name)):
-    new_user = User(users_name[i], i+1, users_solve[i], users_time[i])
-    users.append(new_user)
+    # generating the object of users
+    global users
+    for i in range(len(users_name)):
+        new_user = User(users_name[i], i+1, users_solve[i], users_time[i])
+        users.append(new_user)
 
-print(find_remaining_time(html))
+def update_standing():
+    global users
+    updated = []
+    past_user = users
+    print(past_user[0].name) # check if prev linen works
+
+    init_users() # update
+
+    for i in range(len(users)):
+        if past_user[i].solve_c > users[i].solve_c:
+            updated.append(users[i].name)
+    return updated
+
+def chenges():
+    #now = url_to_html("https://codeforces.com/api/contest.ratingChanges?contestId=566")
+
+    #first with contest.raitingChanges find all handle and rank and then with the bottom address find all their
+    #submissions and update it
+
+    # use this https://codeforces.com/api/contest.status?contestId=1433
+    # &handle=idataaki with all members handle to 
+    # get all their submissions
+    req = requests.get("https://codeforces.com/api/contest.status?contestId=1433&handle=idataaki")
+    r = req.json()
+    if r['status'] == 'OK':
+        rr = r['result']
+        for e in rr:
+            print(e['author'], "\n")    
+    
+
+time = find_remaining_time(url_to_html("https://open.kattis.com/contests/rh8cuo"))
+chenges()
+'''while time != '0:00:00':
+    init_users()
+    # sleep here
+    updated = update_standing()
+    print(updated)
+    if len(updated) > 0:
+        #update.message.reply_text('NEW SUBMISIONS!')
+        for i in range(len(updated)):
+            #update.message.reply_text('{} solved a problem!'.format(updated[i]))
+            print('submision')
+    time = find_remaining_time(url_to_html("https://open.kattis.com/contests/rh8cuo"))'''
