@@ -1,38 +1,29 @@
+def esh(a, b):
+    if (a[0] < b[0]):
+        if a[1] >= b[0]:
+            return True
+        return False
+    elif a[0] > b[0]:
+        if b[1] >= a[0]:
+            return True
+        return False
+    else:
+        return True
 
-d, sumtime = map(int, input().split())
-check = sumtime
-schadule = [0 for i in range(d)]
-newdays = []
+lst = []
+count = 0
+n = int(input())
+for i in range(n):
+    lst.append(list(input().split()))
 
-for i in range(d):
-    days = list(map(int, input().split()))
-    newdays.append(days)
-    if sumtime - days[0] >= 0:
-        sumtime -= days[0]
-        schadule[i] += days[0]
+lst.sort(key=lambda x : x[0])
+print(lst)
 
-
-if sum(schadule) != check:
-    j = 0
-    for el in newdays:
-        while el[1] >= el[0]:
-            # print(el[1])
-            # print(sumtime)
-            if (sumtime + el[0]) - el[1] >= 0:
-                sumtime += el[0]
-                sumtime -= el[1]
-                schadule[j] = el[1]
-                j += 1
-                break
-            else:
-                el[1] -= 1
-
-# print(schadule)
-# print(sumtime)
-# print(sum(schadule))
-if sum(schadule) == check:
-    print("YES")
-    for el in schadule:
-        print(el, end=" ")
+for i in range(n-1):
+    for j in range(i+1, n):
+        if esh(lst[i], lst[j]):
+            count += 1
+if n - count <= 0:
+    print(1)
 else:
-    print("NO")
+    print(n - count)
